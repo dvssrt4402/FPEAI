@@ -1,0 +1,11 @@
+INFO -> 2025-11-17 14:53:32,615: [args] Namespace(log_path='./log', dataset='sst2', save_path='./trained_model', model_type='bert-base-uncased', epochs=3, num_labels=2, lr=2e-05, max_len=128, batch_size=64, use_cuda=True, num_workers=16, seed=42, log_steps=10, eval_steps=10, eps=1.0, embedding_type='cf-vectors', mapping_strategy='conservative', privatization_strategy='s1', save_stop_words=False, mapping_algorithm='entropy', lambda_reg=0.2, max_iter=10, tol=0.0001, cluster_prob='uniform', viz_entropy=False, reports_dir='./reports/entropy_kmeans', data_dir='./datasets', embeddings_dir='./embeddings', sim_root='./sim_word_dict', viz_max_points=3000, annotate_top_n=0, cluster_dump_dir='./cluster_members', text_col=None, num_centroids=60, softmax_temp=1.0, dist_entropy_c=0.5)
+INFO -> 2025-11-17 14:53:32,797: [data] train/dev/test sizes = 697/872/1821
+INFO -> 2025-11-17 14:53:32,801: [data] train.head(3):
+                                                                                                                                               sentence  label
+                          it confirms fincher 's status as a film maker who artfully bends technical know-how to the service of psychological insight .      1
+                                                                      hit and miss as far as the comedy goes and a big ole ' miss in the way of story .      0
+with tightly organized efficiency , numerous flashbacks and a constant edge of tension , miller 's film is one of 2002 's involvingly adult surprises .      1
+INFO -> 2025-11-17 14:53:32,804: [mapping] artifacts missing; building via entropy-only soft clustering …
+INFO -> 2025-11-17 14:53:54,099: [priv] applying S1 on train/test using learned soft clusters …
+INFO -> 2025-11-17 14:54:03,550: [dataloader] ready.
+INFO -> 2025-11-17 14:54:03,550: [training] skipped (set DO_TRAIN=1 to enable). Finished.
