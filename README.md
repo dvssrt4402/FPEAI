@@ -141,8 +141,3 @@ reports/entropy_kmeans/...                                    # png/json diagnos
 - *“No plots”*: pass `--viz_entropy` and check `--reports_dir`. If very few points are available, metrics/plots may be skipped by design.  
 - *“Replacement probabilities look flat/peaky”*: adjust `--softmax_temp` (lower = peakier; higher = flatter).
 
----
-
-## Citation / Attribution
-
-This README describes the concrete implementation in this codebase; please cite the repository or accompanying report if you publish results.
