@@ -1,5 +1,8 @@
 # CusText: Entropy‑Guided Clustering for Semantic Text Privatization
 
+
+GitHub URL: https://github.com/dvssrt4402/FPEAI.git
+
 This repository implements a *cluster‑based word replacement* pipeline for privacy‑preserving text augmentation. At a high level:
 
 1. **Load data** (`datasets/<dataset>/{train,dev,test}.tsv`) and read `"sentence"` (and `"label"` where present).
