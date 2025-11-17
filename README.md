@@ -5,9 +5,9 @@ This repository implements a *cluster‑based word replacement* pipeline for pri
 1. **Load data** (`datasets/<dataset>/{train,dev,test}.tsv`) and read `"sentence"` (and `"label"` where present).
 2. **Build a vocabulary** from the dataset and **load embeddings** for those tokens from `embeddings/cf-vectors.txt` (vectors are L2‑normalized) (This file can be obtained from https://github.com/nmrksic/counter-fitting.git)
 3. **Cluster the tokens** into **K semantic clusters** (medoid/centroid based, entropy‑aware assignment).
-4. **Derive a token→candidate mapping**: for each token, candidate replacements are its cluster mates, per‑token probabilities come from distances to the cluster centroid (softmax with optional temperature).
-5. **Rewrite text**: create privatized `train.tsv` / `test.tsv` by probabilistically replacing tokens, optionally preserving stopwords and jittering numbers.
-6. **(Optional) Visualize** clusters: 2D/3D scatter plots + histograms + intrinsic metrics saved under `reports/`.
+4. **Derive a token→candidate mapping**: for each token, candidate replacements are its cluster mates, per‑token probabilities come from distances to the cluster centroid.
+5. **Rewrite text**: create privatized `train.tsv` / `test.tsv` by probabilistically replacing tokens.
+6. **Visualize** clusters: 2D/3D scatter plots + histograms + intrinsic metrics saved under `reports/`.
 
 > **Why “K clusters” and also a “token map”?**  
 > The **K clusters** are the *semantic groups* your algorithm builds for the dataset vocabulary. The **token map** is a *per‑token view* that lists each token’s candidate replacements and probabilities (often much larger than K because it has one entry per token).
@@ -17,7 +17,7 @@ This repository implements a *cluster‑based word replacement* pipeline for pri
 
 ## Repository layout
 
-- `main.py` — Orchestrates the end‑to‑end run: builds mapping, rewrites datasets, and (optionally) trains a classifier on privatized data.
+- `main.py` — Orchestrates the end‑to‑end run: builds mapping, rewrites datasets.
 - `utils.py` — Core implementation: robust TSV reader, embedding subset loader, entropy‑guided clustering, mapping construction, text rewriting, and visualizations.
 - `args.py` — CLI flags and defaults (dataset paths, number of clusters, temperatures, output locations, etc.).
 
@@ -59,8 +59,8 @@ For each token *t* in a cluster, its candidate set is the other members of the s
 - An optional **“ensure‑one‑replacement”** pass can force at least one semantic‑preserving change per sentence.  
 - Writes to `privatized_dataset/cf-vectors/conservative/eps_<eps>_<strategy>_save_stop_words_<flag>/train.tsv`.
 
-### 6) Visualization & diagnostics (optional)
-- Produces intrinsic metrics (Silhouette, DB‑Index, Calinski‑Harabasz), a histogram of candidate‑set sizes, and 2D/3D scatter plots for quick sanity checks.
+### 6) Visualization & diagnostics
+- Produces histograms of candidate‑set sizes, and 2D/3D scatter plots for quick sanity checks.
 - Saved under `reports/entropy_kmeans/` (configurable via `--reports_dir`).
 
 ---
@@ -111,7 +111,6 @@ datasets/
   sst2/
     train.tsv   # sentence<TAB>label
     dev.tsv     # sentence<TAB>label
-    test.tsv    # sentence   (label optional)
 embeddings/
   cf-vectors.txt
 ```
@@ -124,7 +123,6 @@ privatized_dataset/<embedding_type>/<mapping_strategy>/...    # new train/test .
 reports/entropy_kmeans/...                                    # png/json diagnostics when --viz_entropy
 ```
 
----
 
 ## Notes & design choices
 
@@ -132,6 +130,12 @@ reports/entropy_kmeans/...                                    # png/json diagnos
 - **Numerical stability:** distance→probability uses a stable softmax and renormalization; if a token has no valid candidates, it is left untouched.  
 - **Stopword & number handling:** stopwords may be preserved; numbers receive small random offsets.  
 - **Determinism:** set `--seed` to make centroid seeding and sampling reproducible.
+
+---
+
+## Instructions on Accuracy Comparison Between Original (No privacy) and Private (Pravacy ensured) datasets
+- Run the `<original.ipynb>` for the accuracy test on original dataset.
+- Run the `<private.ipynb>` for the accuracy test on private dataset.
 
 ---
 
