@@ -27,7 +27,6 @@ def get_parser():
     parser.add_argument("--privatization_strategy", type=str, default="s1")
     parser.add_argument("--save_stop_words", type=bool, default=False)
     parser.add_argument("--mapping_algorithm", type=str, default="entropy", choices=["entropy"])
-    parser.add_argument("--lambda_reg", type=float, default=0.2)
     parser.add_argument("--max_iter", type=int, default=10)
     parser.add_argument("--tol", type=float, default=1e-4)
     parser.add_argument("--cluster_prob", type=str, default="uniform", choices=["uniform","softmax"])
