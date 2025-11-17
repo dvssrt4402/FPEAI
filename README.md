@@ -3,9 +3,9 @@
 This repository implements a *cluster‑based word replacement* pipeline for privacy‑preserving text augmentation. At a high level:
 
 1. **Load data** (`datasets/<dataset>/{train,dev,test}.tsv`) and read `"sentence"` (and `"label"` where present).
-2. **Build a vocabulary** from the dataset and **load embeddings** for those tokens from `embeddings/<embedding_type>.txt` (vectors are L2‑normalized).
+2. **Build a vocabulary** from the dataset and **load embeddings** for those tokens from `embeddings/cf-vectors.txt` (vectors are L2‑normalized) (This file can be obtained from https://github.com/nmrksic/counter-fitting.git)
 3. **Cluster the tokens** into **K semantic clusters** (medoid/centroid based, entropy‑aware assignment).
-4. **Derive a token→candidate mapping**: for each token, candidate replacements are its cluster mates; per‑token probabilities come from distances to the cluster centroid (softmax with optional temperature).
+4. **Derive a token→candidate mapping**: for each token, candidate replacements are its cluster mates, per‑token probabilities come from distances to the cluster centroid (softmax with optional temperature).
 5. **Rewrite text**: create privatized `train.tsv` / `test.tsv` by probabilistically replacing tokens, optionally preserving stopwords and jittering numbers.
 6. **(Optional) Visualize** clusters: 2D/3D scatter plots + histograms + intrinsic metrics saved under `reports/`.
 
@@ -41,17 +41,23 @@ This repository implements a *cluster‑based word replacement* pipeline for pri
 - **Outputs:** Two artifacts are written:  
   - `sim_word_dict/<embedding_type>/<mapping_strategy>/<tag>.txt` — cluster membership manifest and per‑token candidate lists  
   - `p_dict/<embedding_type>/<mapping_strategy>/<tag>.txt` — per‑token replacement probabilities
+ 
+##### 3.1) Penalizing High Entropy
+- **Entropy** over centroid‑to‑member distances measures how **spread out** (uniform) the cluster membership likelihood is under the fixed centroid.  
+- High entropy ⇒ distances are comparatively **flat** ⇒ cluster boundary is **diffuse**.  
+- By using `base = -(d + c·H_fixed)` we **discourage high entropy** (spread), encouraging **compact**, well‑anchored clusters near the fixed centroid.  
+- This choice addresses earlier instability (one huge blob + many tiny clusters) that comes from *rewarding* entropy; here we **penalize** it.
 
 ### 4) Token→candidate mapping
 For each token *t* in a cluster, its candidate set is the other members of the same cluster. The per‑token probability vector is obtained by softmaxing the **(negated) distances to the cluster centroid**. A **temperature** `T` sharpens or smooths the distribution: lower `T` → pick closer words more often; higher `T` → flatter. (If probabilities are degenerate or ill‑conditioned, they are renormalized defensively.)
 
-### 5) Text privatization (strategy `s1`)
+### 5) Text privatization Strategy
 - Iterate each sentence; for each token:  
-  - keep stopwords if `--save_stop_words` is set;  
-  - jitter numeric strings slightly to discourage linkage;  
+  - keep stopwords if `--save_stop_words` is set.  
+  - jitter numeric strings slightly to discourage linkage.
   - otherwise, sample a replacement from that token’s candidate list using the per‑token probabilities.  
-- An optional **“ensure‑one‑replacement”** pass can force at least one semantic‑preserving change per sentence (if applicable).  
-- Writes to `privatized_dataset/<embedding_type>/<mapping_strategy>/eps_<eps>_<strategy>_save_stop_words_<flag>/{train|test}.tsv`.
+- An optional **“ensure‑one‑replacement”** pass can force at least one semantic‑preserving change per sentence.  
+- Writes to `privatized_dataset/cf-vectors/conservative/eps_<eps>_<strategy>_save_stop_words_<flag>/train.tsv`.
 
 ### 6) Visualization & diagnostics (optional)
 - Produces intrinsic metrics (Silhouette, DB‑Index, Calinski‑Harabasz), a histogram of candidate‑set sizes, and 2D/3D scatter plots for quick sanity checks.
