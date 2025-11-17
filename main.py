@@ -17,7 +17,6 @@ from torch.utils.data import DataLoader
 DO_TRAIN = bool(int(os.getenv("DO_TRAIN", "0")))
 if DO_TRAIN:
     # Keep imports lazy to avoid heavy deps when only mapping/viz is needed
-    from training import Trainer
     from torch.optim import AdamW        # use torch's AdamW, not transformers'
     from transformers import (
         BertForSequenceClassification,
@@ -109,67 +108,8 @@ def main():
         logger.info("[training] skipped (set DO_TRAIN=1 to enable). Finished.")
         return
 
-    logger.info("[training] starting …")
-    device = torch.device("cuda" if (args.use_cuda and torch.cuda.is_available()) else "cpu")
-
-    model = BertForSequenceClassification.from_pretrained(
-        args.model_type,
-        num_labels=int(args.num_labels),
-        output_attentions=False,
-        output_hidden_states=False,
-    ).to(device)
-
-    optimizer = AdamW(model.parameters(), lr=args.lr, eps=1e-8)
-    total_steps = len(train_loader) * args.epochs
-    scheduler = get_linear_schedule_with_warmup(
-        optimizer,
-        num_warmup_steps=0,
-        num_training_steps=total_steps
-    )
-
-    trainer = Trainer(
-        model=model,
-        scheduler=scheduler,
-        optimizer=optimizer,
-        epochs=args.epochs,
-        log_steps=args.log_steps,
-        eval_steps=args.eval_steps,
-        use_cuda=(device.type == "cuda"),
-        logger=logger,
-    )
-
-    trainer.train(train_loader, dev_loader)
-
-    acc = trainer.predict(test_loader)
-    logger.info(f"[eval] test accuracy = {acc:.4f}")
 
 if __name__ == "__main__":
     main()
 
-        # model = BertForSequenceClassification.from_pretrained(
-        # args.model_type,
-        # num_labels = 2,
-        # output_attentions = False,
-        # output_hidden_states = False)
-
-        # optimizer = AdamW(model.parameters(),lr=args.lr,eps=1e-8)  
-        
-        # scheduler = get_linear_schedule_with_warmup(optimizer, 
-        #                                         num_warmup_steps=0, 
-        #                                         num_training_steps=len(train_loader)*args.epochs)
-        # trainer = Trainer(
-        #         model,
-        #         scheduler,
-        #         optimizer,
-        #         args.epochs,
-        #         args.log_steps,
-        #         args.eval_steps,
-        #         args.use_cuda,
-        #         logger
-        #         )
-
-        # trainer.train(train_loader, test_loader)
-
-        # # evaluate test dataset #
-        # acc = trainer.predict(test_loader)
-        # logger.info(f"test acc = {acc:.4f}.")
+       
