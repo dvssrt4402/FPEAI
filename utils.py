@@ -531,7 +531,7 @@ def get_customized_mapping(eps):
     print(f"\n[entropy_hard] K={K} | centers={len(centers_tokens)} | candidates={len(candidate_tokens)} | "
           f"nonempty={nonempty} | avg_cluster_mates={avg_sz:.2f}", flush=True)
 
-    if getattr(args, "viz_entropy", False):
+    if True:
         try:
             viz_entropy_clusters(args, K)
         except Exception as e:
@@ -623,20 +623,6 @@ def viz_entropy_clusters(args, K):
     # ADD this line right after E_sel is created:
     base = reports_dir / f"{args.embedding_type}_{args.mapping_strategy}_{run_tag}"
 
-    # Metrics (Euclidean space)
-    metrics = {"silhouette": math.nan, "davies_bouldin": math.nan, "calinski_harabasz": math.nan}
-    try:
-        from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
-        if len(np.unique(labels)) >= 2 and len(labels) >= 50:
-            metrics["silhouette"]        = float(silhouette_score(E_sel, labels, metric="euclidean"))
-            metrics["davies_bouldin"]    = float(davies_bouldin_score(E_sel, labels))
-            metrics["calinski_harabasz"] = float(calinski_harabasz_score(E_sel, labels))
-    except Exception as e:
-        print(f"[viz] metrics failed: {e}")
-
-    with (base.parent / f"{base.name}_metrics.json").open("w", encoding="utf-8") as jf:
-        json.dump(metrics, jf, ensure_ascii=False, indent=2)
-    print("[viz] metrics:", metrics)
 
     # Histogram of |Y'|
     try:
